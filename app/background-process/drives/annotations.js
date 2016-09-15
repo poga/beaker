@@ -76,7 +76,7 @@ export function find (archiveKey, url) {
     streamToString(rs, (err, str) => {
       if (err && err.message !== 'Could not find entry') return reject(err)
 
-      resolve(str)
+      resolve({key: archiveKey, body: str})
     })
   })
 }

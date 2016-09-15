@@ -4,6 +4,8 @@ import beakerBookmarks from './api-manifests/bookmarks'
 import beakerDownloads from './api-manifests/downloads'
 import beakerHistory from './api-manifests/history'
 import beakerSitedata from './api-manifests/sitedata'
+import beakerFollowing from './api-manifests/following'
+import beakerAnnotations from './api-manifests/annotations'
 import * as plugins from './plugins'
 
 // dat-plugin is an optional internal dependency
@@ -21,12 +23,14 @@ export function setup () {
   ipcMain.on('get-web-api-manifests', (event, scheme) => {
     // hardcode the beaker: scheme, since that's purely for internal use
     if (scheme == 'beaker:') {
-      var protos = { 
+      var protos = {
         beakerBrowser,
         beakerBookmarks,
         beakerDownloads,
         beakerHistory,
-        beakerSitedata
+        beakerSitedata,
+        beakerFollowing,
+        beakerAnnotations
       }
       if (datPlugin && datPlugin.webAPIs[0])
         protos.datInternalAPI = datPlugin.webAPIs[0].manifest

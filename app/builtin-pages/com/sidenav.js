@@ -9,7 +9,8 @@ var navItems = [
   { href: 'beaker:sites', label: 'Your Sites', icon: 'share' },
   { href: 'beaker:history', label: 'History', icon: 'back-in-time' },
   { href: 'beaker:downloads', label: 'Downloads', icon: 'install' },
-  { href: 'beaker:settings', label: 'Settings', icon: 'list' }
+  { href: 'beaker:settings', label: 'Settings', icon: 'list' },
+  { href: 'beaker:following', label: 'Following', icon: 'list' }
 ]
 
 co(function *() {

@@ -18,11 +18,15 @@ import * as settings from './background-process/dbs/settings'
 import * as sitedata from './background-process/dbs/sitedata'
 import * as bookmarks from './background-process/dbs/bookmarks'
 import * as history from './background-process/dbs/history'
+import * as following from './background-process/dbs/following'
+import * as annotations from './background-process/drives/annotations'
 
 import * as beakerProtocol from './background-process/protocols/beaker'
 import * as beakerFaviconProtocol from './background-process/protocols/beaker-favicon'
 
 import * as openURL from './background-process/open-url'
+
+import * as co from 'co'
 
 // configure logging
 log.setLevel('trace')
@@ -36,6 +40,15 @@ app.on('ready', function () {
   sitedata.setup()
   bookmarks.setup()
   history.setup()
+  following.setup()
+  annotations.setup()
+  // open followed archives
+  co(function* () {
+    var follow = yield following.follows()
+    console.log('following', follow)
+
+    yield follow.map(k => { console.log('opening archive', k); return annotations.open(k.key) })
+  })
 
   // base
   beakerBrowser.setup()

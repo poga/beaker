@@ -7,6 +7,8 @@ import * as promptbar from './ui/promptbar'
 import * as statusBar from './ui/statusbar'
 import { urlToData } from '../lib/fg/img'
 import errorPage from '../lib/error-page'
+import * as yo from 'yo-yo'
+import * as co from 'co'
 
 // constants
 // =
@@ -58,6 +60,7 @@ export function create (opts) {
     webviewEl: createWebviewEl(id, url),
     navbarEl: navbar.createEl(id),
     promptbarEl: promptbar.createEl(id),
+    annotationEl: createAnnotationEl(id),
 
     // page state
     loadingURL: false, // what URL is being loaded, if any?
@@ -127,7 +130,7 @@ export function create (opts) {
   ;([
     ['getURL', ''],
     ['getTitle', ''],
-    
+
     ['goBack'],
     ['canGoBack'],
     ['goForward'],
@@ -155,6 +158,7 @@ export function create (opts) {
   })
   hide(page) // hidden by default
   webviewsDiv.appendChild(page.webviewEl)
+  webviewsDiv.appendChild(page.annotationEl)
 
   // emit
   events.emit('update')
@@ -219,6 +223,7 @@ export function remove (page) {
   // remove
   pages.splice(i, 1)
   webviewsDiv.removeChild(page.webviewEl)
+  webviewsDiv.removeChild(page.annotationEl)
 
   // persist pins w/o this one, if that was
   if (page.isPinned)
@@ -415,7 +420,7 @@ function onLoadCommit (e) {
   // ignore if this is a subresource
   if (!e.isMainFrame)
     return
-  
+
   var page = getByWebview(e.target)
   if (page) {
     // check if this page bookmarked
@@ -431,6 +436,7 @@ function onLoadCommit (e) {
 function onDidStartLoading (e) {
   var page = getByWebview(e.target)
   if (page) {
+    clearAnnotationEl(page)
     page.manuallyTrackedIsLoading = true
     navbar.update(page)
     navbar.hideInpageFind(page)
@@ -442,7 +448,7 @@ function onDidStartLoading (e) {
 
 function onDidStopLoading (e) {
   var page = getByWebview(e.target)
-  if (page) {    
+  if (page) {
     // update history
     var url = page.getURL()
     if (!url.startsWith('beaker:')) {
@@ -502,6 +508,7 @@ function onDidGetResponseDetails (e) {
 function onDidFinishLoad (e) {
   var page = getByWebview(e.target)
   if (page) {
+    renderAnnotationEl(page)
     // reset page object
     page.loadingURL = false
     page.isGuessingTheURLScheme = false
@@ -573,6 +580,7 @@ function show (page) {
   page.webviewEl.classList.remove('hidden')
   page.navbarEl.classList.remove('hidden')
   page.promptbarEl.classList.remove('hidden')
+  page.annotationEl.classList.remove('hidden')
   events.emit('show', page)
 }
 
@@ -580,6 +588,7 @@ function hide (page) {
   page.webviewEl.classList.add('hidden')
   page.navbarEl.classList.add('hidden')
   page.promptbarEl.classList.add('hidden')
+  page.annotationEl.classList.add('hidden')
   events.emit('hide', page)
 }
 
@@ -589,6 +598,31 @@ function createWebviewEl (id, url) {
   el.setAttribute('preload', 'file://'+path.join(remote.app.getAppPath(), 'webview-preload.build.js'))
   el.setAttribute('src', url || DEFAULT_URL)
   return el
+}
+
+function createAnnotationEl (id) {
+  return yo`<div class="annotation" data-id=${id}></div>`
+}
+
+function renderAnnotationEl (page) {
+  co(function* () {
+    try {
+      var data = []
+      var following = yield beakerFollowing.follows()
+      var data = yield following.map(follow => {
+        return beakerAnnotations.find(follow.key, page.getURL())
+      })
+    } catch (err) {
+      console.error(err)
+      // no annotation exist. ignore
+    }
+
+    page.annotationEl.appendChild(yo`<h1>${JSON.stringify(data)}</h1>`)
+  })
+}
+
+function clearAnnotationEl (page) {
+  page.annotationEl.innerHTML = ""
 }
 
 function rebroadcastEvent (e) {

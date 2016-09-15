@@ -5,6 +5,7 @@ import * as sites from './builtin-pages/views/sites'
 import * as history from './builtin-pages/views/history'
 import * as downloads from './builtin-pages/views/downloads'
 import * as settings from './builtin-pages/views/settings'
+import * as following from './builtin-pages/views/following'
 
 // HACK FIX
 // weird bug, prependListener is expected but missing?
@@ -30,7 +31,7 @@ window.history.replaceState = _wr('replaceState');
 // globals
 // =
 
-var views = { start: favorites, sites, history, downloads, settings }
+var views = { start: favorites, sites, history, downloads, settings, following }
 var currentView = getLocationView()
 
 // setup

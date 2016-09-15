@@ -26,6 +26,11 @@
     "sqlite3": "^3.1.4",
     "unused-filename": "^0.1.0",
     "yo-yo": "^1.2.1",
+    "hyperdrive": "^7.5.0",
+    "hyperdrive-archive-swarm": "^4.1.4",
+    "level": "^1.4.0",
+    "stream-to-string": "^1.1.0",
+    "string-to-stream": "^1.1.0",
     "zerr": "^1.0.4"
   }
 }

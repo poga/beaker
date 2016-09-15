@@ -69,13 +69,11 @@ export function add (archiveKey, url, data) {
 
 export function find (archiveKey, url) {
   return new Promise((resolve, reject) => {
-    console.log('find', archiveKey)
     var archive = archives[archiveKey]
     if (!archive) return reject(new ArchiveNotOpened(archiveKey))
 
     var rs = archive.createFileReadStream(urlKey(url))
     streamToString(rs, (err, str) => {
-      console.log('find', 'err', err)
       if (err && err.message !== 'Could not find entry') return reject(err)
 
       resolve(str)

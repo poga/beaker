@@ -625,7 +625,7 @@ function renderAnnotationEl (page) {
 }
 
 function clearAnnotationEl (page) {
-  page.annotationEl.innerHTML = ""
+  page.annotationEl.innerHTML = ''
 }
 
 function rebroadcastEvent (e) {

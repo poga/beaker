@@ -605,10 +605,11 @@ function createAnnotationEl (id) {
 }
 
 function renderAnnotationEl (page) {
-  co(function* () {
+  co(function * () {
+    var following = yield beakerFollowing.follows()
+    var own = following.find(x => {return x.own === 1})
+    console.log(following, own)
     try {
-      var data = []
-      var following = yield beakerFollowing.follows()
       var data = yield following.map(follow => {
         return beakerAnnotations.find(follow.key, page.getURL())
       })
@@ -616,8 +617,10 @@ function renderAnnotationEl (page) {
       console.error(err)
       // no annotation exist. ignore
     }
-
-    page.annotationEl.appendChild(yo`<h1>${JSON.stringify(data)}</h1>`)
+    page.annotationEl.appendChild(yo`<div style="text-align: right">
+      <div>Your Archive: ${JSON.stringify(own)}</div>
+      <div>${JSON.stringify(data)}</div>
+    </div>`)
   })
 }
 

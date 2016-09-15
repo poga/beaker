@@ -28,10 +28,20 @@ export function setup () {
 
 export function open (archiveKey) {
   return new Promise((resolve, reject) => {
-    var archive = drive.createArchive(archiveKey)
-    archives[archiveKey] = archive
+    var archive
+    var key = archiveKey
+    if (archiveKey) {
+      archive = drive.createArchive(archiveKey)
+    } else {
+      archive = drive.createArchive()
+      key = archive.key.toString('hex')
+    }
+
+    archives[key] = archive
+    archive.finalize(() => {
+      resolve(key)
+    })
     swarm(archive)
-    resolve()
   })
 }
 
@@ -59,12 +69,14 @@ export function add (archiveKey, url, data) {
 
 export function find (archiveKey, url) {
   return new Promise((resolve, reject) => {
+    console.log('find', archiveKey)
     var archive = archives[archiveKey]
     if (!archive) return reject(new ArchiveNotOpened(archiveKey))
 
     var rs = archive.createFileReadStream(urlKey(url))
     streamToString(rs, (err, str) => {
-      if (err) return reject(err)
+      console.log('find', 'err', err)
+      if (err && err.message !== 'Could not find entry') return reject(err)
 
       resolve(str)
     })

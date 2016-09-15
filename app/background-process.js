@@ -46,6 +46,12 @@ app.on('ready', function () {
   co(function* () {
     var follow = yield following.follows()
     console.log('following', follow)
+    if (follow.length === 0 || follow.every(f => { return f.own === 0 })) {
+      console.log('init')
+      yield following.initOwn()
+      follow = yield following.follows()
+    }
+    console.log('following', follow)
 
     yield follow.map(k => { console.log('opening archive', k); return annotations.open(k.key) })
   })

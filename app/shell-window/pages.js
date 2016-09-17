@@ -617,6 +617,8 @@ function renderAnnotationEl (page) {
       // no annotation exist. ignore
     }
     page.annotationEl.appendChild(yo`<div style="text-align: right">
+      <input
+        onkeydown=${onAnnotationKeyDown(page)}></input>
       <div>Your Archive: ${JSON.stringify(own)}</div>
       <div>${JSON.stringify(data)}</div>
     </div>`)
@@ -625,6 +627,21 @@ function renderAnnotationEl (page) {
 
 function clearAnnotationEl (page) {
   page.annotationEl.innerHTML = ''
+}
+
+function onAnnotationKeyDown (page) {
+  return e => {
+    if (e.key === 'Enter') {
+      console.log(e.target.value)
+      co(function * () {
+        var following = yield beakerFollowing.follows()
+        var own = following.find(x => { return x.own === 1 })
+        beakerAnnotations.add(own.key, page.getURL(), e.target.value)
+
+        e.target.value = ''
+      })
+    }
+  }
 }
 
 function rebroadcastEvent (e) {

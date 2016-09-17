@@ -26,5 +26,16 @@ function render () {
     return
 
   yo.update(document.querySelector('#el-content'),
-    yo`<div class="pane" id="el-content"><h1>Following</h1>${JSON.stringify(keys)}</div>`)
+    yo`<div class="pane" id="el-content">
+      <div class="settings">
+        <div class="ll-heading">Following</div>
+        <div class="s-section">${renderFollowingList()}</div>
+      </div>
+    </div>`)
+}
+
+function renderFollowingList () {
+  return yo`<div>
+      ${keys.map(k => { return yo`<div>${k.key}</div>` })}
+    </div>`
 }

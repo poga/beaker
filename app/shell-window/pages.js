@@ -436,7 +436,7 @@ function onLoadCommit (e) {
 function onDidStartLoading (e) {
   var page = getByWebview(e.target)
   if (page) {
-    clearAnnotationEl(page)
+    renderAnnotationEl(page)
     page.manuallyTrackedIsLoading = true
     navbar.update(page)
     navbar.hideInpageFind(page)
@@ -605,6 +605,7 @@ function createAnnotationEl (id) {
 }
 
 function renderAnnotationEl (page) {
+  clearAnnotationEl(page)
   co(function * () {
     var following = yield beakerFollowing.follows()
     var own = following.find(x => {return x.own === 1})
@@ -616,13 +617,23 @@ function renderAnnotationEl (page) {
       warnIfError('annotations')(err)
       // no annotation exist. ignore
     }
-    page.annotationEl.appendChild(yo`<div style="text-align: right">
-      <input
+    page.annotationEl.appendChild(yo`<div class="annotation-main">
+      <input class="annotation-input"
         onkeydown=${onAnnotationKeyDown(page)}></input>
-      <div>Your Archive: ${JSON.stringify(own)}</div>
-      <div>${JSON.stringify(data)}</div>
+      <div>${renderAnnotationData(data)}</div>
     </div>`)
   })
+}
+
+function renderAnnotationData (data) {
+  return yo`<div class="annotation-data">
+      ${data.filter(d => d.body).map(d => {
+        return yo`<div>
+          <div class="annotation-body">${d.body}</div>
+          <div class="annotation-key">${d.key}</div>
+        </div>`
+      })}
+    </div>`
 }
 
 function clearAnnotationEl (page) {
@@ -639,6 +650,7 @@ function onAnnotationKeyDown (page) {
         beakerAnnotations.add(own.key, page.getURL(), e.target.value)
 
         e.target.value = ''
+        renderAnnotationEl(page)
       })
     }
   }

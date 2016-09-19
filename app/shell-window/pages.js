@@ -610,13 +610,16 @@ function renderAnnotationEl (page) {
     var following = yield beakerFollowing.follows()
     var own = following.find(x => {return x.own === 1})
     try {
-      var data = yield following.map(follow => {
-        return beakerAnnotations.find(follow.key, page.getURL())
-      })
+      var data = []
+      for(var i=0; i<following.length; i++) {
+        var x = yield beakerAnnotations.find(following[i].key, page.getURL())
+        data.push(x)
+      }
     } catch (err) {
-      warnIfError('annotations')(err)
+      console.error(err)
       // no annotation exist. ignore
     }
+    console.log(data)
     page.annotationEl.appendChild(yo`<div class="annotation-main">
       <input class="annotation-input"
         onkeydown=${onAnnotationKeyDown(page)}></input>

@@ -32,16 +32,18 @@ export function open (archiveKey) {
     var key = archiveKey
     if (archiveKey) {
       archive = drive.createArchive(archiveKey)
+      archives[key] = archive
+      swarm(archive)
+      resolve(key)
     } else {
       archive = drive.createArchive()
       key = archive.key.toString('hex')
+      archives[key] = archive
+      archive.finalize(() => {
+        resolve(key)
+      })
+      swarm(archive)
     }
-
-    archives[key] = archive
-    archive.finalize(() => {
-      resolve(key)
-    })
-    swarm(archive)
   })
 }
 

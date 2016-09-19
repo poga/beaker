@@ -23,7 +23,30 @@ export function setup () {
   db = level(dbPath)
   drive = hyperdrive(db)
 
-  rpc.exportAPI('beakerAnnotations', manifest, { add, find, close })
+  rpc.exportAPI('beakerAnnotations', manifest, { add, find, open, close })
+}
+
+export function open (archiveKey) {
+  return new Promise((resolve, reject) => {
+    var archive
+    var key = archiveKey
+    if (key && archives[key]) return resolve(key)
+
+    if (archiveKey) {
+      archive = drive.createArchive(archiveKey)
+      archives[key] = archive
+      swarm(archive)
+      resolve(key)
+    } else {
+      archive = drive.createArchive()
+      key = archive.key.toString('hex')
+      archives[key] = archive
+      archive.finalize(() => {
+        resolve(key)
+      })
+      swarm(archive)
+    }
+  })
 }
 
 export function close (archiveKey) {
@@ -71,28 +94,5 @@ export function find (archiveKey, url) {
 
 function urlKey (url) {
   return crypto.createHash('sha256').update(url).digest('base64')
-}
-
-function open (archiveKey) {
-  return new Promise((resolve, reject) => {
-    var archive
-    var key = archiveKey
-    if (key && archives[key]) return resolve(key)
-
-    if (archiveKey) {
-      archive = drive.createArchive(archiveKey)
-      archives[key] = archive
-      swarm(archive)
-      resolve(key)
-    } else {
-      archive = drive.createArchive()
-      key = archive.key.toString('hex')
-      archives[key] = archive
-      archive.finalize(() => {
-        resolve(key)
-      })
-      swarm(archive)
-    }
-  })
 }
 

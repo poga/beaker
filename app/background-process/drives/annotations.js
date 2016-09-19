@@ -23,7 +23,7 @@ export function setup () {
   db = level(dbPath)
   drive = hyperdrive(db)
 
-  rpc.exportAPI('beakerAnnotations', manifest, { add, find, open, close })
+  rpc.exportAPI('beakerAnnotations', manifest, { add, find, close })
 }
 
 export function close (archiveKey) {

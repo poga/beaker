@@ -26,10 +26,59 @@ export function setup () {
   rpc.exportAPI('beakerAnnotations', manifest, { add, find, open, close })
 }
 
-export function open (archiveKey) {
+export function close (archiveKey) {
+  return new Promise((resolve, reject) => {
+    open(archiveKey).then(key => {
+      var archive = archives[key]
+
+      if (!archive) return reject(new ArchiveNotOpened(archiveKey))
+
+      archive.close(resolve)
+      delete archives[archiveKey]
+    })
+  })
+}
+
+export function add (archiveKey, url, data) {
+  return new Promise((resolve, reject) => {
+    open(archiveKey).then(key => {
+      var archive = archives[key]
+      if (!archive) return reject(new ArchiveNotOpened(archiveKey))
+
+      var ws = archive.createFileWriteStream(urlKey(url))
+      ws.on('finish', resolve)
+      ws.on('error', reject)
+      stringToStream(data).pipe(ws)
+    })
+  })
+}
+
+export function find (archiveKey, url) {
+  return new Promise((resolve, reject) => {
+    open(archiveKey).then(key => {
+      var archive = archives[key]
+      if (!archive) return reject(new ArchiveNotOpened(archiveKey))
+
+      var rs = archive.createFileReadStream(urlKey(url))
+      streamToString(rs, (err, str) => {
+        if (err && err.message !== 'Could not find entry') return reject(err)
+
+        resolve({key: archiveKey, body: str})
+      })
+    })
+  })
+}
+
+function urlKey (url) {
+  return crypto.createHash('sha256').update(url).digest('base64')
+}
+
+function open (archiveKey) {
   return new Promise((resolve, reject) => {
     var archive
     var key = archiveKey
+    if (key && archives[key]) return resolve(key)
+
     if (archiveKey) {
       archive = drive.createArchive(archiveKey)
       archives[key] = archive
@@ -47,42 +96,3 @@ export function open (archiveKey) {
   })
 }
 
-export function close (archiveKey) {
-  return new Promise((resolve, reject) => {
-    var archive = archives[archiveKey]
-    if (!archive) return reject(new ArchiveNotOpened(archiveKey))
-
-    archive.close(resolve)
-    delete archives[archiveKey]
-  })
-}
-
-export function add (archiveKey, url, data) {
-  return new Promise((resolve, reject) => {
-    var archive = archives[archiveKey]
-    if (!archive) return reject(new ArchiveNotOpened(archiveKey))
-
-    var ws = archive.createFileWriteStream(urlKey(url))
-    ws.on('finish', resolve)
-    ws.on('error', reject)
-    stringToStream(data).pipe(ws)
-  })
-}
-
-export function find (archiveKey, url) {
-  return new Promise((resolve, reject) => {
-    var archive = archives[archiveKey]
-    if (!archive) return reject(new ArchiveNotOpened(archiveKey))
-
-    var rs = archive.createFileReadStream(urlKey(url))
-    streamToString(rs, (err, str) => {
-      if (err && err.message !== 'Could not find entry') return reject(err)
-
-      resolve({key: archiveKey, body: str})
-    })
-  })
-}
-
-function urlKey (url) {
-  return crypto.createHash('sha256').update(url).digest('base64')
-}

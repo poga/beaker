@@ -42,15 +42,12 @@ app.on('ready', function () {
   history.setup()
   following.setup()
   annotations.setup()
-  // open followed archives
-  co(function* () {
+
+  co(function * () {
     var follow = yield following.follows()
     if (follow.length === 0 || follow.every(f => { return f.own === 0 })) {
       yield following.initOwn()
-      follow = yield following.follows()
     }
-
-    yield follow.map(k => { return annotations.open(k.key) })
   })
 
   // base

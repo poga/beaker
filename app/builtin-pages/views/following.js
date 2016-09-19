@@ -29,13 +29,29 @@ function render () {
     yo`<div class="pane" id="el-content">
       <div class="settings">
         <div class="ll-heading">Following</div>
-        <div class="s-section">${renderFollowingList()}</div>
+        <div class="s-section links-list">${renderFollowingList()}</div>
       </div>
     </div>`)
 }
 
 function renderFollowingList () {
   return yo`<div>
-      ${keys.map(k => { return yo`<div>${k.key}</div>` })}
+      ${keys.map(k => {
+        return yo`<div class="ll-row">
+          <div class="ll-link">${k.key}</div>
+          <div class="ll-actions">${k.own === 1 ? yo`<b>own</b>` : yo`<span class="icon icon-cancel-squared" onclick=${onClickDelete(k.key)}></span>`}</div>
+        </div>`
+      })}
     </div>`
+}
+
+function onClickDelete (key) {
+  return () => {
+    co(function * () {
+      yield beakerFollowing.remove(key)
+
+      keys = yield beakerFollowing.follows()
+      render()
+    })
+  }
 }

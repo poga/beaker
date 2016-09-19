@@ -59,6 +59,6 @@ migrations = [
       );
       CREATE INDEX following_key ON following (key);
       PRAGMA user_version = 1;
-    `)
+    `, cb)
   }
 ]

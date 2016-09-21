@@ -9,6 +9,7 @@ import * as swarm from 'hyperdrive-archive-swarm'
 import * as stringToStream from 'string-to-stream'
 import * as streamToString from 'stream-to-string'
 import zerr from 'zerr'
+import * as normalize from 'normalize-url'
 
 const ArchiveNotOpened = zerr('ArchiveNotOpened', 'Archive % must be opened before use')
 
@@ -93,6 +94,6 @@ export function find (archiveKey, url) {
 }
 
 function urlKey (url) {
-  return crypto.createHash('sha256').update(url).digest('base64')
+  return crypto.createHash('sha256').update(normalize(url)).digest('base64')
 }
 

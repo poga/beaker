@@ -6,7 +6,6 @@ import * as yo from 'yo-yo'
 import co from 'co'
 import emitStream from 'emit-stream'
 import { render as renderSitesList } from '../com/sites-list'
-import { create as createModal } from '../com/modal'
 
 // globals
 // =
@@ -47,7 +46,7 @@ export function hide () {
 function render () {
   // content
   var content = (window.datInternalAPI)
-    ? renderSitesList(archives, { renderEmpty })
+    ? renderSitesList(archives, { renderEmpty, onToggleSeedSite, onDeleteSite, onUndoDeletions })
     : renderNotSupported()
 
   // render view
@@ -56,6 +55,9 @@ function render () {
       <div class="ll-heading">
         Your Sites
         <button class="btn" onclick=${onClickNewDat}>New Site</button>
+        <small class="ll-heading-right">
+          <a href="https://beakerbrowser.com/docs/" title="Get Help"><span class="icon icon-lifebuoy"></span> Help</a>
+        </small>
       </div>
       ${content}
     </div>
@@ -112,6 +114,52 @@ function onUpdatePeers ({ key, peers }) {
       archive.peers = peers // update
     render()
   }
+}
+
+
+function onToggleSeedSite (archiveInfo) {
+  return e => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    archiveInfo.userSettings.isSeeding = !archiveInfo.userSettings.isSeeding
+
+    // isSaved must reflect isSeeding
+    if (archiveInfo.userSettings.isSeeding && !archiveInfo.userSettings.isSaved)
+      archiveInfo.userSettings.isSaved = true
+    datInternalAPI.setArchiveUserSettings(archiveInfo.key, archiveInfo.userSettings)
+    
+    render()
+  }
+}
+
+function onDeleteSite (archiveInfo) {
+  return e => {
+    e.preventDefault()
+    e.stopPropagation()
+      
+    archiveInfo.userSettings.isSaved = !archiveInfo.userSettings.isSaved
+
+    // isSeeding must reflect isSaved
+    if (!archiveInfo.userSettings.isSaved && archiveInfo.userSettings.isSeeding)
+      archiveInfo.userSettings.isSeeding = false
+
+    datInternalAPI.setArchiveUserSettings(archiveInfo.key, archiveInfo.userSettings)
+    render()
+  }
+}
+
+function onUndoDeletions (e) {
+  e.preventDefault()
+  e.stopPropagation()
+
+  archives.forEach(archiveInfo => {
+    if (!archiveInfo.userSettings.isSaved) {
+      archiveInfo.userSettings.isSaved = true
+      datInternalAPI.setArchiveUserSettings(archiveInfo.key, archiveInfo.userSettings)
+    }
+  })
+  render()
 }
 
 // helpers

@@ -4,11 +4,7 @@ This uses the beakerBookmarks APIs, which is exposed by webview-preload to all s
 
 import * as yo from 'yo-yo'
 import co from 'co'
-
-// constants
-// =
-
-const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/1bzALt_JzmM_N8B3aK29epE7_VIyZMe0QsCXh3LqPY2I/viewform'
+import * as editSiteModal from '../com/modals/edit-site' 
 
 // globals
 // =
@@ -72,10 +68,18 @@ function render () {
 
   // render the top 9 big, the rest small
   yo.update(document.querySelector('#el-content'), yo`<div class="pane" id="el-content">
+    <div class="welcome">
+      <a class="btn" onclick=${onClickShareFiles}><span class="icon icon-share"></span> Share Files</a>
+      <a class="btn" onclick=${onClickCreateSite}><span class="icon icon-docs"></span> Create a Website</a>
+    </div>
     <div class="favorites links-list">
       <div class="ll-heading">
         Favorites
-        <small class="ll-heading-right"><a href=${FEEDBACK_FORM_URL} title="Send feedback"><span class="icon icon-megaphone"></span> Send Feedback</a></small>
+        <small class="ll-heading-right">
+          <a href="https://community.beakerbrowser.com/" title="Feedback and Discussion"><span class="icon icon-megaphone"></span> Feedback & Discussion</a>
+          <a href="https://github.com/pfrazee/beaker/issues" title="Report Bug"><span class="icon icon-attention"></span> Report Bug</a>
+          <a href="https://beakerbrowser.com/docs/" title="Get Help"><span class="icon icon-lifebuoy"></span> Help</a>
+        </small>
       </div>
       ${bookmarks.map(renderRow)}
       ${helpEl}
@@ -152,4 +156,21 @@ function onClickDelete (i) {
     beakerBookmarks.remove(b.url)
     render()
   }
+}
+
+function onClickShareFiles (e) {
+  editSiteModal.create({}, { title: 'New Files Archive', onSubmit: opts => {
+    datInternalAPI.createNewArchive(opts).then(key => {
+      window.location = 'view-dat://' + key
+    })
+  }})
+}
+
+function onClickCreateSite (e) {
+  editSiteModal.create({}, { title: 'New Website', onSubmit: opts => {
+    opts.useNewSiteTemplate = true
+    datInternalAPI.createNewArchive(opts).then(key => {
+      window.location = 'dat://' + key
+    })
+  }})
 }

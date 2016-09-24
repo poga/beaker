@@ -1,11 +1,12 @@
 /*
-This uses the datInternalAPI API, which is exposed by webview-preload to all sites loaded over the beaker: protocol
+This uses the datInternalAPI API, which is exposed by webview-preload to all archives loaded over the beaker: protocol
 */
 
 import * as yo from 'yo-yo'
 import co from 'co'
 import emitStream from 'emit-stream'
-import { render as renderSitesList } from '../com/sites-list'
+import { render as renderArchivesList } from '../com/archives-list'
+import * as editSiteModal from '../com/modals/edit-site' 
 
 // globals
 // =
@@ -17,7 +18,7 @@ var archives
 
 export function setup () {
   if (!window.datInternalAPI)
-    return console.warn('Dat plugin is required for the Sites page.')
+    return console.warn('Dat plugin is required for the Archives page.')
 
   // wire up events
   var archivesEvents = emitStream(datInternalAPI.archivesEventStream())
@@ -26,7 +27,7 @@ export function setup () {
 }
 
 export function show () {
-  document.title = 'Your Sites'
+  document.title = 'Your Archives'
   co(function*(){
     if (window.datInternalAPI) {
       // fetch archives
@@ -46,16 +47,17 @@ export function hide () {
 function render () {
   // content
   var content = (window.datInternalAPI)
-    ? renderSitesList(archives, { renderEmpty, onToggleSeedSite, onDeleteSite, onUndoDeletions })
+    ? renderArchivesList(archives, { renderEmpty, onToggleServeArchive, onDeleteArchive, onUndoDeletions })
     : renderNotSupported()
 
   // render view
   yo.update(document.querySelector('#el-content'), yo`<div class="pane" id="el-content">
-    <div class="sites">
+    <div class="archives">
       <div class="ll-heading">
-        Your Sites
-        <button class="btn" onclick=${onClickNewDat}>New Site</button>
+        Your Archives
+        <button class="btn" onclick=${onClickCreateArchive}>New Archive</button>
         <small class="ll-heading-right">
+          <a href="https://beakerbrowser.com/docs/faq.html#what-are-archives" title="What are Dat Archives?"><span class="icon icon-help-circled"></span> What are Dat Archives?</a>
           <a href="https://beakerbrowser.com/docs/" title="Get Help"><span class="icon icon-lifebuoy"></span> Help</a>
         </small>
       </div>
@@ -65,11 +67,11 @@ function render () {
 }
 
 function renderEmpty () {
-  return yo`<div class="ll-empty">You have not added or created any sites.</div>`
+  return yo`<div class="ll-empty">You have not added or created any archives.</div>`
 }
 
 function renderNotSupported () {
-  return yo`<div class="sites-listing">
+  return yo`<div class="archives-listing">
     <div class="ll-empty">The DAT Plugin must be enabled to use this feature.</div>
   </div>`
 }
@@ -86,10 +88,12 @@ function renderNotSupported () {
 //   render()
 // }
 
-function onClickNewDat (e) {
-  datInternalAPI.createNewArchive().then(key => {
-    window.location = 'view-dat://' + key + '#new' // include the #new to trigger the edit modal
-  })
+function onClickCreateArchive (e) {
+  editSiteModal.create({}, { title: 'New Files Archive', onSubmit: opts => {
+    datInternalAPI.createNewArchive(opts).then(key => {
+      window.location = 'dat://' + key
+    })
+  }})
 }
 
 function onUpdateArchive (update) {
@@ -117,15 +121,15 @@ function onUpdatePeers ({ key, peers }) {
 }
 
 
-function onToggleSeedSite (archiveInfo) {
+function onToggleServeArchive (archiveInfo) {
   return e => {
     e.preventDefault()
     e.stopPropagation()
 
-    archiveInfo.userSettings.isSeeding = !archiveInfo.userSettings.isSeeding
+    archiveInfo.userSettings.isServing = !archiveInfo.userSettings.isServing
 
-    // isSaved must reflect isSeeding
-    if (archiveInfo.userSettings.isSeeding && !archiveInfo.userSettings.isSaved)
+    // isSaved must reflect isServing
+    if (archiveInfo.userSettings.isServing && !archiveInfo.userSettings.isSaved)
       archiveInfo.userSettings.isSaved = true
     datInternalAPI.setArchiveUserSettings(archiveInfo.key, archiveInfo.userSettings)
     
@@ -133,16 +137,16 @@ function onToggleSeedSite (archiveInfo) {
   }
 }
 
-function onDeleteSite (archiveInfo) {
+function onDeleteArchive (archiveInfo) {
   return e => {
     e.preventDefault()
     e.stopPropagation()
       
     archiveInfo.userSettings.isSaved = !archiveInfo.userSettings.isSaved
 
-    // isSeeding must reflect isSaved
-    if (!archiveInfo.userSettings.isSaved && archiveInfo.userSettings.isSeeding)
-      archiveInfo.userSettings.isSeeding = false
+    // isServing must reflect isSaved
+    if (!archiveInfo.userSettings.isSaved && archiveInfo.userSettings.isServing)
+      archiveInfo.userSettings.isServing = false
 
     datInternalAPI.setArchiveUserSettings(archiveInfo.key, archiveInfo.userSettings)
     render()

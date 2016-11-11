@@ -6,7 +6,7 @@ import * as archivesDb from '../../dbs/archives'
 import * as sitedataDb from '../../dbs/sitedata'
 import { statArchiveFile, readArchiveFile, readArchiveDirectory, writeArchiveFile, writeArchiveDirectory, toValidEncoding } from './helpers'
 import log from 'loglevel'
-import { 
+import {
   DAT_HASH_REGEX,
   DAT_QUOTA_DEFAULT_BYTES_ALLOWED,
 
@@ -27,6 +27,14 @@ import {
 // =
 
 export default {
+  createDerivedArchive: m(function * (transforms) {
+    return new Promise((resolve, reject) => {
+      dat.createDerivedArchive(transforms).then(rdd => {
+        rdd.collect().toArray(resolve)
+      })
+    })
+  }),
+
   stat: m(function * (url, opts = {}) {
     // TODO versions
     // TODO timeout

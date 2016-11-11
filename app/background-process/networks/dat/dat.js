@@ -7,6 +7,7 @@ import log from 'loglevel'
 import trackArchiveEvents from './track-archive-events'
 import { throttle, cbPromise } from '../../../lib/functions'
 import { bufToStr, readReadme, readManifest, writeArchiveFile } from './helpers'
+import transform from 'dat-transform'
 
 // db modules
 import * as archivesDb from '../../dbs/archives'
@@ -63,6 +64,14 @@ export const setGlobalSetting = archivesDb.setGlobalSetting
 
 // archive creation
 // =
+
+export function createDerivedArchive (transforms) {
+  return new Promise((resolve, reject) => {
+    var rdd = transform.unmarshal(drive, transforms)
+    hyperdriveArchiveSwarm(rdd._archive)
+    resolve(rdd)
+  })
+}
 
 export function createNewArchive (opts) {
   // massage inputs

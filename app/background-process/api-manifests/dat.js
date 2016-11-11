@@ -1,4 +1,5 @@
 export default {
+  createDerivedArchive: 'promise',
   createArchive: 'promise',
 
   stat: 'promise',

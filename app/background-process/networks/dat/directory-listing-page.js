@@ -49,7 +49,7 @@ export default function renderDirectoryListingPage (archive, path, cb) {
     // summary
     var summary = `<div class="entry">${names.length} ${pluralize(names.length, 'file')}, ${prettyBytes(totalBytes)}</div>`
     // render
-    cb(styles + updog + entries + summary)
+    cb(styles + updog + entries + summary + '<a href="beaker:editor" target="_blank">Open in notebook</a>')
   })
 }
 

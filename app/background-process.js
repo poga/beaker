@@ -21,6 +21,7 @@ import * as settings from './background-process/dbs/settings'
 import * as sitedata from './background-process/dbs/sitedata'
 import * as bookmarks from './background-process/dbs/bookmarks'
 import * as history from './background-process/dbs/history'
+import * as interactive from './background-process/dbs/interactive.js'
 
 import * as beakerProtocol from './background-process/protocols/beaker'
 import * as beakerFaviconProtocol from './background-process/protocols/beaker-favicon'
@@ -48,6 +49,7 @@ app.on('ready', function () {
   sitedata.setup()
   bookmarks.setup()
   history.setup()
+  interactive.setup()
 
   // base
   beakerBrowser.setup()

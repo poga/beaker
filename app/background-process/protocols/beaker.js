@@ -113,5 +113,9 @@ function beakerServer (req, res) {
     return cb(200, 'OK', 'image/png', path.join(__dirname, 'assets/img/logo.png'))
   }
 
+  if (requestUrl === 'beaker:editor') {
+    return cb(200, 'OK', 'text/html', path.join(__dirname, 'editor.html'))
+  }
+
   return cb(404, 'Not Found')
 }

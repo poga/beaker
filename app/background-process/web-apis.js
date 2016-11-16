@@ -4,6 +4,7 @@ import beakerBookmarks from './api-manifests/internal/bookmarks'
 import beakerDownloads from './api-manifests/internal/downloads'
 import beakerHistory from './api-manifests/internal/history'
 import beakerSitedata from './api-manifests/internal/sitedata'
+import beakerInteractive from './api-manifests/internal/interactive'
 import datInternalAPI from './api-manifests/internal/dat-internal'
 import dat from './api-manifests/external/dat'
 import * as plugins from './plugins'
@@ -31,6 +32,7 @@ export function setup () {
         beakerDownloads,
         beakerHistory,
         beakerSitedata,
+        beakerInteractive,
         datInternalAPI
       }
       event.returnValue = protos
@@ -45,6 +47,7 @@ export function setup () {
         beakerDownloads,
         beakerHistory,
         beakerSitedata,
+        beakerInteractive,
         datInternalAPI
       }
 

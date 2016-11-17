@@ -11,6 +11,7 @@
     "beaker-plugin-ipfs": "~2.0.1",
     "browser-es-module-loader": "^0.1.6",
     "co": "^4.6.0",
+    "codemirror": "^5.20.2",
     "concat-stream": "^1.5.2",
     "electron-localshortcut": "^0.6.0",
     "emit-stream": "^0.1.2",

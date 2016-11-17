@@ -116,6 +116,15 @@ function beakerServer (req, res) {
   if (requestUrl === 'beaker:editor') {
     return cb(200, 'OK', 'text/html', path.join(__dirname, 'editor.html'))
   }
+  if (requestUrl === 'beaker:editor.js') {
+    return cb(200, 'OK', 'application/javascript', path.join(__dirname, 'editor.build.js'))
+  }
+  if (requestUrl === 'beaker:editor.css') {
+    return cb(200, 'OK', 'text/css', path.join(__dirname, 'stylesheets/editor.css'))
+  }
+  if (requestUrl === 'beaker:codemirror.css') {
+    return cb(200, 'OK', 'text/css', path.join(__dirname, 'stylesheets/codemirror.css'))
+  }
 
   return cb(404, 'Not Found')
 }
